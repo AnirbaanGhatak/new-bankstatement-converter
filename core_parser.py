@@ -37,7 +37,7 @@ class BankStatementParser:
         df = pd.DataFrame()
         
         if self.bank_name == "AXIS":
-            df = self._parse_axis()
+            df = self._parse_axis_bank()
         elif self.bank_name == "BOB":
             df = self._parse_bob()
         elif self.bank_name == "BOM":
