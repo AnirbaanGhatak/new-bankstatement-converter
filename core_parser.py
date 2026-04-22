@@ -67,12 +67,7 @@ class BankStatementParser:
             df = self._parse_saraswat()
             
         elif self.bank_name == "HDFC":
-            # HDFC Format Auto-Detection (Cascade)
-            try:
-                df = self._parse_hdfc_v1()
-                if df.empty or len(df) < 2: raise ValueError
-            except:
-                df = self._parse_hdfc_v2()
+            df = self._parse_hdfc()
                 
         elif self.bank_name == "ICICI":
             # ICICI Format Auto-Detection (Cascade)
@@ -410,6 +405,34 @@ class BankStatementParser:
                 
         return result_df[standard_cols]
 
+
+    def _parse_hdfc(self):
+        """
+        Intelligently routes to HDFC V1 or V2 based on column header text.
+        V1 uses "Withdrawal Amount". V2 uses "Withdrawal Amt."
+        """
+        try:
+            with pdfplumber.open(self.file_path) as pdf:
+                first_page_text = pdf.pages[0].extract_text() or ""
+        except:
+            first_page_text = ""
+
+        # Check for the specific spelling used in Format 1
+        if "Withdrawal Amount" in first_page_text or "Closing Balance*" in first_page_text:
+            return self._parse_hdfc_v1()
+        
+        # Check for the specific spelling used in Format 2
+        elif "Withdrawal Amt" in first_page_text or "Value Dt" in first_page_text:
+            return self._parse_hdfc_v2()
+            
+        else:
+            # Fallback if it's a weird scan: try V2 (Stream) first as it handles messy data better
+            try:
+                df = self._parse_hdfc_v2()
+                if not df.empty and len(df) > 1: return df
+            except:
+                pass
+            return self._parse_hdfc_v1()
     
     def _parse_hdfc_v1(self):
             """
@@ -442,7 +465,6 @@ class BankStatementParser:
             standard_cols = ["Date", "Particulars", "Chq No", "Debit", "Credit", "Balance"]
             return df[standard_cols]
 
-    
     def _parse_hdfc_v2(self):
             """
             Parses the messy, multi-line HDFC format using stream and cumsum block logic.
@@ -581,7 +603,6 @@ class BankStatementParser:
             standard_cols = ["Date", "Particulars", "Chq No", "Debit", "Credit", "Balance"]
             return result_df[standard_cols]
 
-    
     def _parse_icici_v1(self):
             """
             Parses the standard ICICI Bank statement (Red Headers) using lattice.
@@ -617,7 +638,6 @@ class BankStatementParser:
             standard_cols = ["Date", "Particulars", "Chq No", "Debit", "Credit", "Balance"]
             return df[standard_cols]
 
-    
     def _parse_icici_v2(self):
             """
             Parses the ICICI 'Detailed Statement' format using lattice.
@@ -654,7 +674,6 @@ class BankStatementParser:
             standard_cols = ["Date", "Particulars", "Chq No", "Debit", "Credit", "Balance"]
             return df[standard_cols]
 
-    
     def _parse_icici_privilege(self):
             """
             Parses ICICI Privilege Banking statements using stream.
@@ -722,7 +741,6 @@ class BankStatementParser:
             standard_cols = ["Date", "Particulars", "Chq No", "Debit", "Credit", "Balance"]
             return result_df[standard_cols]
 
-    
     def _parse_icici_pb(self):
             """
             Parses ICICI Private Banking statements using stream.
@@ -876,7 +894,6 @@ class BankStatementParser:
             else:
                 return self._parse_kotak_v2()
 
-    
     def _parse_kotak_v1(self):
             """
             Parses Kotak Format 1 (Grey/White).
@@ -946,7 +963,6 @@ class BankStatementParser:
             standard_cols = ["Date", "Particulars", "Chq No", "Debit", "Credit", "Balance"]
             return result_df[standard_cols]
 
-    
     def _parse_kotak_v2(self):
             """
             Parses Kotak Format 2 (Red/Yellow).
@@ -1223,6 +1239,7 @@ class BankStatementParser:
             # 5. Standardize Output
             standard_cols = ["Date", "Particulars", "Chq No", "Debit", "Credit", "Balance"]
             return result_df[standard_cols]
+
 
     def _parse_yes(self):
             """
