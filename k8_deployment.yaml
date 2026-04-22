@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bank-parser-deployment
+  labels:
+    app: bank-parser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bank-parser
+  template:
+    metadata:
+      labels:
+        app: bank-parser
+    spec:
+      containers:
+      - name: bank-parser-container
+        image: us-central1-docker.pkg.dev/${GCP_PROJECT_ID}/parser-repo/bank-app:v1 
+        ports:
+        - containerPort: 8501
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi" 
+            cpu: "1000m" 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bank-parser-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: bank-parser
+  ports:
+    - protocol: TCP
+      port: 80         
+      targetPort: 8501
