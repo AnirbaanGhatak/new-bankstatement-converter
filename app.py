@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # --- The Dashboard App ---
-st.title("🤖 Bank Statement Converter & AI Categorizer")
+st.title("🤖 Bank Statement Converter")
 
 # --- Bank Selection Map ---
 bank_options = {
@@ -67,6 +67,9 @@ with col2:
         type="pdf",
         accept_multiple_files=False
     )
+
+st.info("If encountered any error or a bank is to be added please inform Anirbaan(Tojo)")
+
 
 st.divider()
 
