@@ -73,7 +73,7 @@ st.info("If encountered any error or a bank is to be added please inform Anirbaa
 
 st.divider()
 
-st.subheader("Step 2: AI Categorization (Optional)")
+st.subheader("Step 2: AI Categorization (Optional) (Trials Ongoing)")
 st.info("Upload previously categorized Excels to teach the AI how to assign Account Heads.")
 historical_files = st.file_uploader("Upload Historical Data", type=["xlsx", "xls"], accept_multiple_files=True)
 
