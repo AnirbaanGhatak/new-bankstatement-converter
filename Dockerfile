@@ -1,11 +1,11 @@
 # 1. Base Image
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 # 2. Working Directory
 WORKDIR /app
 
 # 3. System Dependencies (for Camelot and OpenCV)
-RUN apt-get update && apt-get install -y ghostscript libgl1-mesa-glx libglib2.0-0
+RUN apt-get update && apt-get install -y ghostscript && rm -rf /var/lib/apt/lists/*
 
 # 4. Copy Requirements
 COPY requirements.txt .
@@ -16,6 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 6. Copy App Code
 COPY core_parser.py .
 COPY app.py .
+COPY trainmodel.py .
 
 # 7. Open the Door
 EXPOSE 8501
